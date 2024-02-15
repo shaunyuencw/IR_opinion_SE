@@ -4,6 +4,12 @@ import os
 import yaml
 import re
 from bs4 import BeautifulSoup
+from collections import Counter
+from tqdm import tqdm
+
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+import torch
+from typing import Tuple, List
 
 def load_config(config_file):
     with open(config_file, 'r') as file:
@@ -148,6 +154,66 @@ def load_news_from_file(file_path):
         print(f"No file found at {file_path}")
         return None
 
+def estimate_individual_sentiment(news_item: str, allow_neutral: bool = True) -> Tuple[str, float]:
+    """
+    Estimates sentiment for an individual news item, returning the sentiment label and its confidence score.
+    If 'allow_neutral' is False and the top sentiment is 'neutral', it returns the second-highest sentiment and its confidence.
+    """
+    tokens = tokenizer(news_item, return_tensors="pt", padding=True, truncation=True, max_length=512).to(device)
+    with torch.no_grad():  # Inference mode
+        result = model(tokens["input_ids"], attention_mask=tokens["attention_mask"])["logits"]
+    softmax_results = torch.nn.functional.softmax(result, dim=-1)[0]  # Take first item's results
+
+    if not allow_neutral:
+        # Sort the results to get the indices of the sentiments in descending order of confidence
+        sorted_indices = torch.argsort(softmax_results, descending=True)
+        if labels[sorted_indices[0]] == "neutral":
+            # If the top sentiment is neutral, use the second-highest confidence sentiment
+            max_index = sorted_indices[1]
+        else:
+            max_index = sorted_indices[0]
+    else:
+        max_index = torch.argmax(softmax_results)
+
+    sentiment = labels[max_index]
+    confidence = softmax_results[max_index].item()  # Convert to Python float
+
+    return sentiment, confidence
+
+
+def estimate_and_aggregate_sentiments(news_items: List[str]) -> List[Tuple[str, float]]:
+    """
+    Estimates sentiments for multiple news items and returns a list of tuples with sentiment labels and confidence scores.
+    """
+    detailed_sentiments = [estimate_individual_sentiment(news_item, False) for news_item in news_items]
+    return detailed_sentiments
+
+def aggregate_sentiments(detailed_sentiments, normalize: bool = True) -> float:
+    """
+    Aggregates sentiments from multiple news items and calculates a score,
+    giving less weight to neutral sentiments in the normalization step.
+    """
+    score = 0
+    total_confidence = 0  # Sum of confidence for non-neutral sentiments
+
+    for sentiment, confidence in detailed_sentiments:
+        if sentiment == "positive":
+            score += confidence  # Positive contributes to the score
+            total_confidence += confidence
+        elif sentiment == "negative":
+            score -= confidence  # Negative detracts from the score
+            total_confidence += confidence
+        # Neutral sentiments do not contribute to score or total confidence
+
+    if normalize:
+        # Normalize the score by total confidence of non-neutral sentiments
+        normalized_score = score / total_confidence if total_confidence > 0 else 0
+
+        return normalized_score
+    else:
+        return score
+
+
 
 # Load configuration
 config = load_config('config.yaml')
@@ -163,16 +229,44 @@ headers = {
   'Content-Type': 'application/json'
 }
 
+news = []
+num_articles = 10
 data = fetch_data(url, payload, headers, search_query)
-# Assuming 'data' is the fetched or loaded data from the 'fetch_data' function
-if data and "news" in data and len(data["news"]) > 0:
-    first_news_item = data["news"][0]  # Access the first news item
-    print("First News Item:")
-    print(f"Title: {first_news_item.get('title', 'No title')}")
-    print(f"Link: {first_news_item.get('link', 'No link')}")
 
-    print("\nFetching article body...")
-    article_body = fetch_article_body(first_news_item["link"])
-    print(article_body)
-    save_news_to_file(article_body, "cache/news.txt")
+# Assuming 'data' is the fetched or loaded data from the 'fetch_data' function
+print(f"Fetching articles...")
+if data and "news" in data and len(data["news"]) > 0:
+    print(f"Found {len(data['news'])} articles.")
+    for article in tqdm(data["news"][:num_articles], desc="Fetching Articles"):
+        # news.append(article["title"]) #! Not very accurate lol
+                    
+        article_body = fetch_article_body(article["link"])
+        news.append(article_body)
+
+device = "mps" if torch.backends.mps.is_available() else "cpu" # If using Apple Silicon
+
+tokenizer = AutoTokenizer.from_pretrained("ProsusAI/finbert")
+model = AutoModelForSequenceClassification.from_pretrained("ProsusAI/finbert").to(device)
+labels = ["positive", "negative", "neutral"]
+
+print(f"Processing and estimating sentiments...")
+detailed_sentiments = estimate_and_aggregate_sentiments(news)
+
+for i, article in enumerate(data["news"][:num_articles]):
+    print(f"Title: {article.get('title', 'No title')}")
+    # print(f"Link: {article.get('link', 'No link')}")
+
+    sentiment, confidence = detailed_sentiments[i]
+    print(f"Sentiment: {sentiment} (Confidence: {confidence:.2f})")
+    print()
+
+overall_sentiment = aggregate_sentiments(detailed_sentiments, True)
+if overall_sentiment > 0.1:
+    print(f"The overall sentiment is positive with a score of {overall_sentiment * 100:.2f}")
+elif overall_sentiment < -0.1:
+    print(f"The overall sentiment is negative with a score of {overall_sentiment * 100:.2f}")
+else:
+    print(f"The overall sentiment is neutral with a score of {overall_sentiment * 100:.2f}")
+
+
 
