@@ -1,7 +1,9 @@
 from fastapi import FastAPI, Form
 from pydantic import BaseModel
+from starlette.concurrency import run_in_threadpool
 
 import helpers
+from utilities import *
 import random
 
 import torch
@@ -22,7 +24,7 @@ The user will provide an input topic and a raw news article. The system will cle
 **Rule 1: Remove Non-Article Elements**
 *  Delete advertisements, error messages, disclaimers, links, author information, post-article recommendations, embedded social media widgets, subscription prompts, and any other items that are not sentences from the main article body.
 * **Focus on Format:** Identify these elements based primarily on their structure and common patterns  (e.g., email signatures, "Read More" links, disclaimers in smaller fonts, sections clearly separated by visual dividers).
-
+c d
 **Rule 2: Isolate Relevant Content**
 * **Direct Keyword Match:** Keep sentences containing ANY of the provided keywords.
 * **Context Preservation:**  If a sentence doesn't contain a keyword but is ESSENTIAL to understanding the flow and meaning of subsequent keyword-containing sentences, keep it. 
@@ -45,6 +47,16 @@ class SentimentRequestForm(BaseModel):
     query_topic: str
     num_articles: int
     llm_clean: bool = False
+
+# Asynchronous endpoint to fetch ticker data
+@app.get("/{ticker}", response_model=TickerInfo)
+async def get_ticker_info(ticker: str):
+    ticker_data = Ticker(ticker=ticker)
+    return TickerInfo(
+        name=ticker_data.name,
+        news=ticker_data.news,
+        info=ticker_data.info
+    )
 
 @app.post("/get_sentiments/")
 async def get_sentiments(query_topic: str = Form(...), num_articles: int = Form(...), llm_clean: bool = Form(False)):

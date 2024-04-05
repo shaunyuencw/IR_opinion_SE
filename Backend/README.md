@@ -49,3 +49,5 @@ Before you begin, ensure you have the following installed:
 
 ### Running the Application
 With the environment set up and the API key configured, you're ready to run the application.
+
+Start the server with `uvicorn backend:app --reload`
