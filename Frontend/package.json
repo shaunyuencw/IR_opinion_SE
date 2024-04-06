@@ -14,6 +14,7 @@
     "@emotion/styled": "^11.11.5",
     "@mui/icons-material": "^5.15.15",
     "@mui/material": "^5.15.15",
+    "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-d3-speedometer": "^2.2.1",
     "react-dom": "^18.2.0",

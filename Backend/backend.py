@@ -36,7 +36,7 @@ Cleaned Article: <Article>
 
 # Load configuration
 config = helpers.load_config('config.yaml')
-device = "mps" if torch.backends.mps.is_available() else "cpu" # If using Apple Silicon
+# device = "mps" if torch.backends.mps.is_available() else "cpu" # If using Apple Silicon
 llm = Ollama(model="gemma", system=system_instruct, num_ctx=8192, num_predict=1024, temperature=0, top_k=0, top_p=0)
 
 def get_sentiment(article):

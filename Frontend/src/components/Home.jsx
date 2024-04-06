@@ -84,24 +84,27 @@ const Home = () => {
                                 Latest News
                             </Typography>
                             <Grid container spacing={2}>
-                                <Grid item xs={12} md={6}>
-                                    <Typography variant="h6" fontWeight="700">
-                                        Tesla to open new factory in Texas
-                                    </Typography>
-                                    <Typography>
-                                        Tesla Inc. will open a new factory in Austin, Texas, to produce its Cybertruck, Semi, Model 3, and Model Y vehicles. The company has already started construction on the site, which will be the largest Tesla factory in the world.
-                                    </Typography>
-                                </Grid>
-                                <Grid item xs={12} md={6}>
-                                    <Typography variant="h6" fontWeight="700">
-                                        Tesla to open new factory in Texas
-                                    </Typography>
-                                    <Typography>
-                                        Tesla Inc. will open a new factory in Austin, Texas, to produce its Cybertruck, Semi, Model 3, and Model Y vehicles. The company has already started construction on the site, which will be the largest Tesla factory in the world.
-                                    </Typography>
-                                </Grid>
+                                {data.news.map((newsItem) => (
+                                    <Grid item xs={12} md={6} key={newsItem.uuid}>
+                                        <Typography variant="h6" fontWeight="700">
+                                            {newsItem.title}
+                                        </Typography>
+                                        <Typography variant="body2" color="textSecondary">
+                                            {newsItem.publisher}
+                                        </Typography>
+                                        <Typography sx={{ mt: 1 }}>
+                                            <a href={newsItem.link} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>
+                                                Sentiment Score | Snippet from BeautifulSoup
+                                            </a>
+                                        </Typography>
+                                        {newsItem.thumbnail && newsItem.thumbnail.resolutions.length > 0 && (
+                                            <Box component="img" src={newsItem.thumbnail.resolutions[0].url} alt="News thumbnail" sx={{ width: '100%', mt: 2, borderRadius: 2 }} />
+                                        )}
+                                    </Grid>
+                                ))}
                             </Grid>
                         </Box>
+
                     </Box>
                 )}
             </Container>
