@@ -3,13 +3,20 @@ from models.Ticker import *
 from models.LLM import *
 from models.News import *
 import httpx
+import response_info_tsla
 
 app = FastAPI()
 url = "https://google.serper.dev/news"
 
+@app.get("/info/tsla", response_model=TickerInfo)
+async def get_ticker_info():
+    print("Fetching cache...")
+    return response_info_tsla.data
+
 # Asynchronous endpoint to fetch ticker data
 @app.get("/info/{ticker}", response_model=TickerInfo)
 async def get_ticker_info(ticker: str):
+    print("Fetching ticker information...")
     ticker_data = Ticker(ticker=ticker)
     
     # Fetch news for the ticker

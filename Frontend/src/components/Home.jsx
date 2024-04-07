@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
-import { Container, Box, Typography, Grid, Divider } from '@mui/material';
+import { Container, Box, Typography, Grid, Divider, Chip, Avatar } from '@mui/material';
 import Header from './Header';
 import SentimentSpeedometer from './SentimentSpeedometer';
 
@@ -11,7 +11,7 @@ const Home = () => {
 
     useEffect(() => {
         // Fetch stock data from the backend when component mounts or id changes
-        fetch(`/api/${id}`)
+        fetch(`/api/info/${id}`)
             .then(res => res.json())
             .then(data => {
                 setData(data)
@@ -84,24 +84,43 @@ const Home = () => {
                                 Latest News
                             </Typography>
                             <Grid container spacing={2}>
-                                {data.news.map((newsItem) => (
-                                    <Grid item xs={12} md={6} key={newsItem.uuid}>
-                                        <Typography variant="h6" fontWeight="700">
-                                            {newsItem.title}
-                                        </Typography>
-                                        <Typography variant="body2" color="textSecondary">
-                                            {newsItem.publisher}
-                                        </Typography>
-                                        <Typography sx={{ mt: 1 }}>
-                                            <a href={newsItem.link} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>
-                                                Sentiment Score | Snippet from BeautifulSoup
-                                            </a>
-                                        </Typography>
-                                        {newsItem.thumbnail && newsItem.thumbnail.resolutions.length > 0 && (
-                                            <Box component="img" src={newsItem.thumbnail.resolutions[0].url} alt="News thumbnail" sx={{ width: '100%', mt: 2, borderRadius: 2 }} />
-                                        )}
+                                {data.news.filter(newsItem => newsItem.source && newsItem.link).map((newsItem, index) => (
+                                    <Grid container spacing={2} key={index}>
+                                        {/* Sentiment Analysis Section */}
+                                        <Grid item xs={12} md={3}>
+                                            <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', mb: 2 }}>
+                                                Sentiment Analysis
+                                            </Typography>
+                                            {/* You can add the sentiment analysis content here */}
+                                        </Grid>
+
+                                        {/* News Content Section */}
+                                        <Grid item xs={12} md={9}>
+                                            <Box display="flex" flexDirection="column">
+                                                <Box display="flex" alignItems="center" marginBottom={1}>
+                                                    {newsItem.source && newsItem.source.icon ? (
+                                                        <Avatar src={newsItem.source.icon} alt={newsItem.source.name} sx={{ width: 48, height: 48, marginRight: 2 }} />
+                                                    ) : (
+                                                        <Avatar sx={{ width: 48, height: 48, marginRight: 2 }} />
+                                                    )}
+                                                    <Typography variant="h6" fontWeight="700" component="a" href={newsItem.link} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>
+                                                        {newsItem.title}
+                                                    </Typography>
+                                                </Box>
+                                                <Typography variant="body2" color="textSecondary">
+                                                    {newsItem.source ? newsItem.source.name : 'Unknown Source'} by {newsItem.source && newsItem.source.authors ? newsItem.source.authors.join(", ") : 'Anonymous'}
+                                                </Typography>
+                                                {newsItem.thumbnail && (
+                                                    <Box component="img" src={newsItem.thumbnail} alt="News thumbnail" sx={{ width: '100%', mt: 2, borderRadius: 2 }} onError={(e) => { e.target.style.display = 'none'; }} />
+                                                )}
+                                                <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
+                                                    {newsItem.date}
+                                                </Typography>
+                                            </Box>
+                                        </Grid>
                                     </Grid>
                                 ))}
+
                             </Grid>
                         </Box>
 

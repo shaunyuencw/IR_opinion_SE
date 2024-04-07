@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./components/Home";
 
 function App() {
@@ -8,6 +8,7 @@ function App() {
       <Router>
         <Routes>
           <Route path='/:id' element={<Home />}></Route>
+          <Route path="/" element={<Navigate to="/tsla" replace />} />
         </Routes>
       </Router>
     </>
