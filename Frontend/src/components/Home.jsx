@@ -9,17 +9,14 @@ const Home = () => {
     const { id } = useParams();
     const [data, setData] = useState(null);
 
+    const fetchData = async () => {
+        const response = await fetch(`/api/info?ticker=${id}`);
+        const data = await response.json();
+        setData(data);
+    };
+
     useEffect(() => {
-        // Fetch stock data from the backend when component mounts or id changes
-        fetch(`/api/info/${id}`)
-            .then(res => res.json())
-            .then(data => {
-                setData(data)
-                console.log(data);
-            })
-            .catch((error) => {
-                console.error("Failed to fetch data:", error);
-            });
+        fetchData();
     }, [id]);
 
 

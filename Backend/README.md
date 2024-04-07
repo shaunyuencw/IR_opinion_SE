@@ -57,3 +57,6 @@ Start the server with `uvicorn backend:app --reload`
 1.  Berd: Prob and semantics value 
 2.  SVM: Positive or Negative
 3.  LSTM: Not going to use it (output same as berd)
+
+### Start the ElasticSearch Server
+`docker compose up -d`

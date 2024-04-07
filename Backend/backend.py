@@ -1,21 +1,40 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from models.Ticker import *
 from models.LLM import *
 from models.News import *
+from models.ElasticSearch import *
 import httpx
 import response_info_tsla
 
 app = FastAPI()
-url = "https://google.serper.dev/news"
+# url = "https://google.serper.dev/news"
 
-@app.get("/info/tsla", response_model=TickerInfo)
-async def get_ticker_info():
-    print("Fetching cache...")
-    return response_info_tsla.data
+# Add a middleware to allow CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://127.0.0.1:5173"],  # Adjust the allowed origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Or specify the allowed methods
+    allow_headers=["*"],  # Or specify the allowed headers
+)
+
+
+# Query Index with Elastic search
+@app.get("/query/", response_model=list[dict])
+async def search(search_term: str):
+    elastic = Elastic()
+    results = elastic.perform_search(search_term)
+    return results
+
 
 # Asynchronous endpoint to fetch ticker data
-@app.get("/info/{ticker}", response_model=TickerInfo)
+@app.get("/info/", response_model=TickerInfo)
 async def get_ticker_info(ticker: str):
+    if ticker.upper() == "TSLA":
+        print("Fetching cache...")
+        return response_info_tsla.data
+    
     print("Fetching ticker information...")
     ticker_data = Ticker(ticker=ticker)
     
