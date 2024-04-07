@@ -1,9 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from models.Ticker import *
 from models.LLM import *
 from models.News import *
 from models.ElasticSearch import *
+from typing import List, Optional
 import httpx
 import response_info_tsla
 
@@ -21,10 +22,12 @@ app.add_middleware(
 
 
 # Query Index with Elastic search
-@app.get("/query/", response_model=list[dict])
-async def search(search_term: str):
+@app.get("/query/", response_model=List[dict])
+async def search(search_term: str, exact_phrase: Optional[str] = None, 
+                 include_words: Optional[List[str]] = Query(None), exclude_words: Optional[List[str]] = Query(None), 
+                 exchange_type: Optional[str] = None):
     elastic = Elastic()
-    results = elastic.perform_search(search_term)
+    results = elastic.perform_search(search_term, exact_phrase, include_words, exclude_words, exchange_type)
     return results
 
 

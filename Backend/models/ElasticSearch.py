@@ -1,6 +1,7 @@
 import pandas as pd
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
+from typing import Optional, List
 import json
 
 
@@ -43,31 +44,55 @@ class Elastic:
             f"Successfully indexed {success} documents. Failed to index {failed} documents."
         )
 
-    def perform_search(self, search_term) -> list:
+    def perform_search(self, search_term: str, exact_phrase: Optional[str] = None, 
+                       include_words: Optional[List[str]] = None, exclude_words: Optional[List[str]] = None, 
+                       exchange_type: Optional[str] = None) -> list:
         if not search_term:
             return []
 
-        # query top 10 hits with fuzziness
-        q = {
-            "size": 10,  # Limit the results to top 10 matches
-            "query": {"multi_match": {"query": search_term, "fields": ["Ticker", "Name"], "fuzziness": "AUTO"}},
-            
-            # Query on a single field with fuzziness is not as accurate as multi_match
-            # "query": {"match": {"Ticker": {"query": search_term, "fuzziness": "AUTO"}}},
+        # Basic multi_match query setup
+        query = {
+            "bool": {
+                "must": [],
+                "should": [
+                    {"multi_match": {"query": search_term, "fields": ["Ticker", "Name"], "fuzziness": "AUTO"}}
+                ],
+                "must_not": [],
+                "filter": []
+            }
         }
-        search_results = self.es.search(index=self.index_name, body=q)
+        
+        # Add exact phrase condition
+        if exact_phrase:
+            query['bool']['must'].append({"match_phrase": {"Name": exact_phrase}})
 
+        # Add words to include
+        if include_words:
+            for word in include_words:
+                query['bool']['must'].append({"match": {"Name": word}})
+
+        # Add words to exclude
+        if exclude_words:
+            for word in exclude_words:
+                query['bool']['must_not'].append({"match": {"Name": word}})
+        
+        # Filter by exchange type
+        if exchange_type:
+            query['bool']['filter'].append({"term": {"Exchange": exchange_type}})
+
+        # Execute the search query
+        search_results = self.es.search(index=self.index_name, body={"size": 10, "query": query})
+
+        # Process results
         matching_symbols = []
-        for hit in search_results["hits"]["hits"]:
-            # CSV Header : Ticker	Name	Exchange
-            item = {
-                "symbol": hit["_source"]["Ticker"],
-                "name": hit["_source"]["Name"],
-                }
-
+        for hit in search_results['hits']['hits']:
+            # if exchange_type and hit["_source"]["Exchange"] != exchange_type:
+            #     continue
+            item = {"symbol": hit["_source"]["Ticker"], "name": hit["_source"]["Name"]}
             matching_symbols.append(item)
 
         return matching_symbols
+
 
 
 # elastic = Elastic()

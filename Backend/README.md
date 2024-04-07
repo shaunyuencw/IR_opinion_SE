@@ -60,3 +60,14 @@ Start the server with `uvicorn backend:app --reload`
 
 ### Start the ElasticSearch Server
 `docker compose up -d`
+To maximize the feature that elastic search supports:
+Basic Search Query: This searches for "Apple" in the Ticker and Name fields.
+`GET http://localhost:8000/query/?search_term=Apple&exact_phrase=Apple Inc`
+Exact Phrase Search: This searches for the exact phrase "Apple Inc" in the Name field.
+`GET http://localhost:8000/query/?search_term=Apple&exact_phrase=Apple Inc`
+Include Words: This searches for "micro" in the Name field and includes "software" and "hardware" in the Name field.
+`GET http://localhost:8000/query/?search_term=micro&include_words=software&include_words=hardware`
+Exclude Words: This searches for "energy" but excludes any results that have "solar" in the Name field.
+`GET http://localhost:8000/query/?search_term=energy&exclude_words=solar`
+Filter by Exchange Type: This searches for "financial" in companies listed on the NYSE.
+`GET http://localhost:8000/query/?search_term=financial&exchange_type=NYSE`
