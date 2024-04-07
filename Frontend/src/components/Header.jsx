@@ -1,94 +1,126 @@
 import React, { useState, useEffect } from 'react';
-import { AppBar, Toolbar, TextField, IconButton, useTheme, useMediaQuery, Autocomplete } from '@mui/material';
+import { AppBar, Toolbar, TextField, IconButton, Button, useTheme, useMediaQuery, Autocomplete, MenuItem, Select, FormControl, InputLabel, Box, Collapse, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import { useNavigate } from 'react-router-dom';
 import { debounce } from 'lodash';
 
 const Header = () => {
     const [searchQuery, setSearchQuery] = useState('');
+    const [exactPhrase, setExactPhrase] = useState('');
+    const [includeWords, setIncludeWords] = useState('');
+    const [excludeWords, setExcludeWords] = useState('');
+    const [exchangeType, setExchangeType] = useState('');
     const [suggestions, setSuggestions] = useState([]);
+    const [showAdvanced, setShowAdvanced] = useState(false);
     const navigate = useNavigate();
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-    // Debounce the fetchSuggestions function to avoid too many calls
-    const fetchSuggestions = debounce(async (query) => {
-        if (query.length >= 3) {
-            // const response = await fetch(`https://ticker-2e1ica8b9.now.sh/keyword/${query}`);
-            const response = await fetch(`/api/query?search_term=${query}`);
+    const fetchSuggestions = debounce(async () => {
+        if (searchQuery.length >= 3) {
+            const queryParts = [];
+            if (searchQuery) queryParts.push(`search_term=${searchQuery}`);
+            if (exactPhrase) queryParts.push(`exact_phrase=${exactPhrase}`);
+            if (includeWords) queryParts.push(`include_words=${includeWords}`);
+            if (excludeWords) queryParts.push(`exclude_words=${excludeWords}`);
+            if (exchangeType) queryParts.push(`exchange_type=${exchangeType}`);
+            const queryString = queryParts.join('&');
+
+            const response = await fetch(`/api/query?${queryString}`);
             const data = await response.json();
             setSuggestions(data);
         } else {
             setSuggestions([]);
         }
-    }, 300); // Adjust debounce time as needed
+    }, 300);
 
     useEffect(() => {
-        fetchSuggestions(searchQuery);
-    }, [searchQuery]);
+        fetchSuggestions();
+    }, [searchQuery, exactPhrase, includeWords, excludeWords, exchangeType]);
 
-    const handleSearch = (event, value, reason) => {
-        if (reason === 'selectOption' && value) {
-            // When a suggestion is selected, navigate using its symbol
+    const handleSearch = (event, value) => {
+        event.preventDefault();
+        if (value && value.symbol) {
             navigate(`/${value.symbol}`);
-        } else if (reason === 'createOption' || reason === 'blur') {
-            // When the user types a custom value and presses enter or the input loses focus
+        } else {
             navigate(`/${searchQuery}`);
         }
     };
 
     return (
-        <AppBar position="static" color="primary" elevation={1} sx={{ borderRadius: 8, margin: theme.spacing(2), justifyContent: 'center' }}>
-            <Toolbar sx={{ justifyContent: 'center', padding: theme.spacing(0, 2) }}>
+        <AppBar position="static" elevation={1} sx={{ margin: theme.spacing(0), padding: '20px', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', borderRadius: 8, background: '#93c5fd' }}>
+            <Toolbar sx={{ width: '100%', justifyContent: 'space-between', padding: theme.spacing(0) }}>
+                <IconButton onClick={(e) => handleSearch(e, { symbol: searchQuery })} aria-label="search" color="inherit">
+                    <SearchIcon fontSize="large" />
+                </IconButton>
                 <Autocomplete
                     freeSolo
                     disableClearable
+                    color="inherit"
                     options={suggestions}
-                    sx={{ position: 'relative', display: 'inline-flex', width: isMobile ? '100%' : '50%', maxWidth: 600 }}
+                    sx={{ width: '90%' }}
                     getOptionLabel={(option) => `${option.name} (${option.symbol})`}
                     onInputChange={(event, newInputValue) => {
                         setSearchQuery(newInputValue);
                     }}
                     inputValue={searchQuery}
-                    onChange={handleSearch}
                     renderInput={(params) => (
                         <TextField
                             {...params}
                             fullWidth
                             variant="outlined"
                             placeholder="Search stock ticker (e.g., AAPL, Apple)"
-                            size="small"
-                            sx={{
-                                borderRadius: 20,
-                                backgroundColor: theme.palette.background.paper,
-                                "& .MuiOutlinedInput-root": {
-                                    borderRadius: 20,
-                                },
-                                "& fieldset": {
-                                    borderWidth: `2px`,
-                                },
-                                "&:hover fieldset": {
-                                    borderColor: 'secondary.main',
-                                },
-                                "& .Mui-focused fieldset": {
-                                    borderColor: theme.palette.secondary.main,
-                                },
-                            }}
-                            InputProps={{
-                                ...params.InputProps,
-                                endAdornment: (
-                                    <>
-                                        {params.InputProps.endAdornment}
-                                        <IconButton onClick={(e) => handleSearch(e, { symbol: searchQuery }, 'createOption')} aria-label="search" sx={{ borderRadius: '50%' }}>
-                                            <SearchIcon />
-                                        </IconButton>
-                                    </>
-                                ),
-                            }}
+                            size="medium"
                         />
                     )}
                 />
+                <IconButton onClick={() => setShowAdvanced(!showAdvanced)} aria-label="expand">
+                    {showAdvanced ? <ArrowDropUpIcon fontSize="large" /> : <ArrowDropDownIcon fontSize="large" />}
+                </IconButton>
             </Toolbar>
+            <Collapse in={showAdvanced} sx={{ width: '100%' }}>
+                <Typography variant="h6" sx={{ my: 2, color: '#020617' }}>Narrow your search result</Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%' }}>
+                    <TextField
+                        label="Exact Phrase"
+                        variant="outlined"
+                        size="medium"
+                        fullWidth
+                        value={exactPhrase}
+                        onChange={(e) => setExactPhrase(e.target.value)}
+                    />
+                    <TextField
+                        label="Include Words"
+                        variant="outlined"
+                        size="medium"
+                        fullWidth
+                        value={includeWords}
+                        onChange={(e) => setIncludeWords(e.target.value)}
+                    />
+                    <TextField
+                        label="Exclude Words"
+                        variant="outlined"
+                        size="medium"
+                        fullWidth
+                        value={excludeWords}
+                        onChange={(e) => setExcludeWords(e.target.value)}
+                    />
+                    <FormControl fullWidth size="medium">
+                        <InputLabel>Exchange Type</InputLabel>
+                        <Select
+                            value={exchangeType}
+                            label="Exchange Type"
+                            onChange={(e) => setExchangeType(e.target.value)}
+                        >
+                            <MenuItem value="">Any</MenuItem>
+                            <MenuItem value="NYSE">NYSE</MenuItem>
+                            <MenuItem value="NASDAQ">NASDAQ</MenuItem>
+                        </Select>
+                    </FormControl>
+
+                </Box>
+            </Collapse>
         </AppBar>
     );
 };

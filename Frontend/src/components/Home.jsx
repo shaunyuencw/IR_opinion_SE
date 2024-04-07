@@ -30,12 +30,9 @@ const Home = () => {
                 ) : (
                     <Box sx={{ my: 4 }}>
                         <Header />
-                        <Box sx={{ borderBottom: 1, borderColor: 'divider', pb: 2, mb: 2 }}>
+                        <Box sx={{ borderBottom: 1, borderColor: 'divider', pb: 2, mb: 2, pt: 8 }}>
                             <Typography variant="h4" component="h1" fontWeight="700">
                                 {data.name}
-                            </Typography>
-                            <Typography variant="h5" component="h2" fontWeight="100">
-                                NASDAQ: {data.name}
                             </Typography>
                         </Box>
 
