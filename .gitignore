@@ -1,0 +1,11 @@
+__pycach__
+.DS_Store
+config.yaml
+__pycache__/backend.cpython-310.pyc
+__pycache__/helpers.cpython-310.pyc
+Analysis/rand.csv
+Analysis/test_set.csv
+archive/data/*
+cache/*
+data/*
+archive/*
