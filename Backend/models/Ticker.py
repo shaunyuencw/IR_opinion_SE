@@ -8,7 +8,7 @@ class Ticker:
         self.ticker = ticker
         self.socket = yf.Ticker(self.ticker)
         self.name = (self.socket.info.get("longName", "N/A"),)
-        self.news = self.socket.news if self.socket.news is not None else []
+        self.news = None
         self.info = {
             "sector": self.socket.info.get("sector", "N/A"),
             "summary": self.socket.info.get("longBusinessSummary", "N/A"),

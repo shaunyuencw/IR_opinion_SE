@@ -53,7 +53,7 @@ With the environment set up and the API key configured, you're ready to run the 
 Start the server with `uvicorn backend:app --reload`
 
 
-### Model:
-1.  Berd: Prob and semantics value 
-2.  SVM: Positive or Negative
-3.  LSTM: Not going to use it (output same as berd)
+Model:
+1. Berd: Prob and semantics value 
+2. SVM: Positive or Negative
+3. LSTM: Not going to use it (output same as berd)
