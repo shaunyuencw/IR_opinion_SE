@@ -9,3 +9,6 @@ archive/data/*
 cache/*
 data/*
 archive/*
+
+Classification/bert_train/model_full.pth/
+Classification/roBERTa_train/model_full.pth/
