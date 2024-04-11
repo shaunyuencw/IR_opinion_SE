@@ -1,4 +1,4 @@
-{
+data = {
     "search_metadata": {
         "id": "661198d53c3fb29a6ee1263b",
         "status": "Success",

@@ -2,6 +2,8 @@ import os
 from pydantic import BaseModel
 from dotenv import load_dotenv
 import httpx
+from response_search_news import data
+from pprint import pprint
 
 # Load environment variables
 load_dotenv()
@@ -38,3 +40,34 @@ async def fetch_news(query: str, country_code: str = None, sort_by: str = None):
         response.raise_for_status()  # Will raise exception for 4XX/5XX responses
         return response.json()
 
+def flatten_news(news_results: dict):
+    """
+    Flatten the news results from SerpApi into a list of dictionaries.
+    """
+    news_list = []
+    for news_item in news_results.get("news_results", []):
+        news_dict = {
+            "title": news_item.get("title"),
+            "link": news_item.get("link"),
+            "source": news_item.get("source"),
+            "date": news_item.get("date"),
+        }
+        
+        # if any of the keys are missing, it is a nested stories
+        if not all(news_dict.values()):
+            list_stories = news_item.get("stories", [])
+            for story in list_stories:
+                story_dict = {
+                    "title": story.get("title"),
+                    "link": story.get("link"),
+                    "source": story.get("source"),
+                    "date": story.get("date"),
+                }
+                news_list.append(story_dict)
+        else:
+            news_list.append(news_dict)
+    return news_list
+
+# Example usage
+# news_results = data
+# pprint(flatten_news(news_results))

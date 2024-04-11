@@ -8,7 +8,6 @@ class Ticker:
         self.ticker = ticker
         self.socket = yf.Ticker(self.ticker)
         self.name = (self.socket.info.get("longName", "N/A"),)
-        self.news = None
         self.info = {
             "sector": self.socket.info.get("sector", "N/A"),
             "summary": self.socket.info.get("longBusinessSummary", "N/A"),
@@ -23,3 +22,4 @@ class TickerInfo(BaseModel):
     name: tuple
     news: list
     info: dict
+    sentimental_score: float
