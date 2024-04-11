@@ -19,6 +19,19 @@ const Home = () => {
         fetchData();
     }, [id]);
 
+    // Determine the color of the chip based on the sentiment
+    const getColor = (sentiment) => {
+        switch (sentiment.toLowerCase()) {
+            case 'positive':
+                return 'success';
+            case 'negative':
+                return 'error';
+            case 'neutral':
+                return 'warning';
+            default:
+                return 'default';
+        }
+    };
 
     return (
         <>
@@ -60,7 +73,7 @@ const Home = () => {
                                 Sentiment Analysis
                             </Typography>
                             <Typography textAlign="justify">
-                                <SentimentSpeedometer rating={500} />
+                                <SentimentSpeedometer rating={data.sentimental_score} />
                             </Typography>
                         </Box>
 
@@ -79,13 +92,19 @@ const Home = () => {
                             </Typography>
                             <Grid container spacing={2}>
                                 {data.news.filter(newsItem => newsItem.source && newsItem.link).map((newsItem, index) => (
-                                    <Grid container spacing={2} key={index}>
+                                    <Grid container spacing={2} mt={2} key={index}>
                                         {/* Sentiment Analysis Section */}
                                         <Grid item xs={12} md={3}>
-                                            <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', mb: 2 }}>
-                                                Sentiment Analysis
+                                            <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', p: 2 }}>
+                                                <Chip
+                                                    label={`${newsItem.sentiment.sentiment} | Confidence: ${Math.round(newsItem.sentiment.confidence * 100)}%`}
+                                                    color={getColor(newsItem.sentiment.sentiment)}
+                                                    size="large"
+                                                />
                                             </Typography>
-                                            {/* You can add the sentiment analysis content here */}
+                                            <Typography variant="body2" component="div" sx={{ mb: 1 }}>
+
+                                            </Typography>
                                         </Grid>
 
                                         {/* News Content Section */}
