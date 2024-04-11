@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import CircularProgress from '@mui/material/CircularProgress';
-import { Container, Box, Typography, Grid, Divider, Chip, Avatar } from '@mui/material';
+import { CircularProgress, Container, Box, Typography, Grid, Chip, Avatar, FormControl, InputLabel, Select, MenuItem, Stack } from '@mui/material';
 import Header from './Header';
 import SentimentSpeedometer from './SentimentSpeedometer';
 
 const Home = () => {
     const { id } = useParams();
     const [data, setData] = useState(null);
+    const [sentimentFilter, setSentimentFilter] = useState('');
 
     const fetchData = async () => {
         const response = await fetch(`/api/info?ticker=${id}`);
@@ -32,6 +32,15 @@ const Home = () => {
                 return 'default';
         }
     };
+
+    // Function to count articles by sentiment
+    const countArticlesBySentiment = () => data ? data.news.reduce((acc, curr) => {
+        const sentiment = curr.sentiment.sentiment.toLowerCase();
+        acc[sentiment] = (acc[sentiment] || 0) + 1;
+        return acc;
+    }, {positive: 0, neutral: 0, negative: 0}) : {positive: 0, neutral: 0, negative: 0};
+
+    const sentimentCounts = data ? countArticlesBySentiment() : {positive: 0, neutral: 0, negative: 0};
 
     return (
         <>
@@ -86,12 +95,34 @@ const Home = () => {
                             </Typography>
                         </Box>
 
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                            <Stack direction="row" spacing={1}>
+                                <Chip label={`Total Articles: ${data.news.length}`} />
+                                <Chip label={`Positive: ${sentimentCounts.positive}`} color="success" />
+                                <Chip label={`Neutral: ${sentimentCounts.neutral}`} color="warning" />
+                                <Chip label={`Negative: ${sentimentCounts.negative}`} color="error" />
+                            </Stack>
+                            <FormControl variant="outlined" sx={{ minWidth: 180 }}>
+                                <InputLabel>Sentiment Filter</InputLabel>
+                                <Select
+                                    value={sentimentFilter}
+                                    onChange={(e) => setSentimentFilter(e.target.value)}
+                                    label="Sentiment Filter"
+                                >
+                                    <MenuItem value="">All</MenuItem>
+                                    <MenuItem value="positive">Positive</MenuItem>
+                                    <MenuItem value="neutral">Neutral</MenuItem>
+                                    <MenuItem value="negative">Negative</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Box>
+
                         <Box sx={{ my: 4 }}>
                             <Typography variant="h6" component="h2" fontWeight="300" sx={{ borderBottom: 1, borderColor: 'divider', pb: 1, mb: 2 }}>
                                 Latest News
                             </Typography>
                             <Grid container spacing={2}>
-                                {data.news.filter(newsItem => newsItem.source && newsItem.link).map((newsItem, index) => (
+                                {data.news.filter(newsItem => sentimentFilter === '' || newsItem.sentiment.sentiment.toLowerCase() === sentimentFilter).map((newsItem, index) => (
                                     <Grid container spacing={2} mt={2} key={index}>
                                         {/* Sentiment Analysis Section */}
                                         <Grid item xs={12} md={3}>

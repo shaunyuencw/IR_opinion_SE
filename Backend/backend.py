@@ -153,6 +153,11 @@ async def search(search_term: str, exact_phrase: Optional[str] = None,
 # Asynchronous endpoint to fetch ticker data
 @app.get("/info/", response_model=TickerInfo)
 async def get_ticker_info(ticker: str):
+    # Return response_info_tsla if the ticker is TSLA
+    if ticker.upper() == "TSLA":
+        print("Fetching cache...")
+        return response_info_tsla.data
+    
     print("Fetching ticker information...")
     ticker_data = Ticker(ticker=ticker)
     
