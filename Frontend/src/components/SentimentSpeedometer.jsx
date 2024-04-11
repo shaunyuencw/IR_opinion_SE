@@ -20,7 +20,7 @@ const SentimentSpeedometer = ({ rating }) => {
 
     // Convert the overall normalized sentimental score from [-1, 1] to [0, 1000]
     const getSentimentRating = (score) => {
-        return ((score + 1) * (1000) / 2);
+        return ((score + 1)/2 * 1000);
     }
 
     return (

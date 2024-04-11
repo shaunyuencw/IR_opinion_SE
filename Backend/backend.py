@@ -8,8 +8,11 @@ from models.SentimentModels import *
 from typing import List, Optional
 import httpx
 import response_info_tsla
+import response_info_aapl
+import response_info_goog
 import response_search_news
 from pprint import pprint
+import time
 
 # Sentiment Analysis imports
 import pickle
@@ -153,18 +156,25 @@ async def search(search_term: str, exact_phrase: Optional[str] = None,
 # Asynchronous endpoint to fetch ticker data
 @app.get("/info/", response_model=TickerInfo)
 async def get_ticker_info(ticker: str):
-    # Return response_info_tsla if the ticker is TSLA
+    # cache the response for TSLA, AAPL, GOOGL
     if ticker.upper() == "TSLA":
         print("Fetching cache...")
         return response_info_tsla.data
+    if ticker.upper() == "AAPL":
+        print("Fetching cache...")
+        return response_info_aapl.data
+    if ticker.upper() == "GOOG":
+        print("Fetching cache...")
+        return response_info_goog.data
     
     print("Fetching ticker information...")
     ticker_data = Ticker(ticker=ticker)
     
     # Fetch news for the ticker
     try:
-        # news_results = await fetch_news(ticker)
-        news_results = response_search_news.data
+        start_time = time.time()
+        news_results = await fetch_news(ticker)
+        # news_results = response_search_news.data
         flattened_news = flatten_news(news_results)
         print("\tTotal Articles: ", len(flattened_news))
         
@@ -177,25 +187,25 @@ async def get_ticker_info(ticker: str):
             # Aggregate the sentiment predictions
             if prediction["sentiment"] == "Positive":
                 numerator += (1 * prediction["confidence"])
-            else:
+                denominator += prediction["confidence"]
+            elif prediction["sentiment"] == "Negative":
                 numerator += (-1 * prediction["confidence"])
-            denominator += prediction["confidence"]
+                denominator += prediction["confidence"]
         
         # Calculate the overall sentiment for the ticker
         sentiment_score = numerator / denominator
-        normalized_score = (sentiment_score + 1) / 2
-        print("\tNormalized Sentimental Score: ", normalized_score)
     except httpx.HTTPStatusError as e:
         print(f"Failed to fetch news for {ticker}: {e.response.text}")
     except Exception as e:
         print(f"An error occurred: {str(e)}")
 
+    print("--- %s seconds ---" % (time.time() - start_time))
     # Return the combined ticker and news information
     return TickerInfo(
         name=ticker_data.name,
         news=flattened_news,
         info=ticker_data.info,
-        sentimental_score=normalized_score
+        sentimental_score=sentiment_score
     )
 
 

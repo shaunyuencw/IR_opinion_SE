@@ -26,11 +26,11 @@ def load_models():
     roberta_model = torch.load(roberta_model_path, map_location='cpu')
     tokenizer_r = RobertaTokenizer.from_pretrained('roberta-base')
 
-    # Load SVM models
-    with open('models/SVMs/neutral_model.sav', 'rb') as f:
-        svm_neutral_model = pickle.load(f)
-    with open('models/SVMs/pos_neg_model.sav', 'rb') as f:
-        svm_opinion_model = pickle.load(f)
+    # # Load SVM models
+    # with open('models/SVMs/neutral_model.sav', 'rb') as f:
+    #     svm_neutral_model = pickle.load(f)
+    # with open('models/SVMs/pos_neg_model.sav', 'rb') as f:
+    #     svm_opinion_model = pickle.load(f)
 
 # Load models at the start
 load_models()
@@ -75,25 +75,25 @@ def sentiment_output(input_text):
     roberta_confidence = roberta_probs[0, roberta_predicted_class].item()
 
     #SVM PREDICTION
-    check_neutrality = svm_neutral_model.predict_proba([input_text])[0]
+    # check_neutrality = svm_neutral_model.predict_proba([input_text])[0]
     
-    best_confidence = max(check_neutrality)
-    svm_sentiment = np.argmax(check_neutrality)
+    # best_confidence = max(check_neutrality)
+    # svm_sentiment = np.argmax(check_neutrality)
     
-    check_polarity = svm_opinion_model.predict_proba([input_text])[0]
-    polarity_confidence = max(check_polarity)
+    # check_polarity = svm_opinion_model.predict_proba([input_text])[0]
+    # polarity_confidence = max(check_polarity)
     
-    if svm_sentiment == 0:
-        svm_sentiment = 1
-        svm_confidence = best_confidence
+    # if svm_sentiment == 0:
+    #     svm_sentiment = 1
+    #     svm_confidence = best_confidence
     
-    else:
-        if np.argmax(check_polarity) == 0:
-            svm_sentiment = 0
-        else:
-            svm_sentiment = 2
-        svm_confidence = polarity_confidence
-    svm_con_arr = [check_polarity[0],check_neutrality[0],check_polarity[1]]
+    # else:
+    #     if np.argmax(check_polarity) == 0:
+    #         svm_sentiment = 0
+    #     else:
+    #         svm_sentiment = 2
+    #     svm_confidence = polarity_confidence
+    # svm_con_arr = [check_polarity[0],check_neutrality[0],check_polarity[1]]
 
     #Final sentiment and Final Confidence
     predictions = [bert_sentiment, roberta_sentiment]
@@ -104,13 +104,13 @@ def sentiment_output(input_text):
     if num_occurrences == 1:
         #print("FLAG 1")
         #SVM is used as tiebreaker
-        if svm_sentiment in predictions:
-            final_sentiment = svm_sentiment
-            final_confidence = (probs[0, final_sentiment].item() + roberta_probs[0, final_sentiment].item() + svm_con_arr[final_sentiment]) /3
+        # if svm_sentiment in predictions:
+        #     final_sentiment = svm_sentiment
+        #     final_confidence = (probs[0, final_sentiment].item() + roberta_probs[0, final_sentiment].item() + svm_con_arr[final_sentiment]) /3
         #If still tie, roBERTa is used as the final sentiment
-        else:
-            final_sentiment = roberta_sentiment
-            final_confidence = (probs[0, final_sentiment].item() + roberta_probs[0, final_sentiment].item()) /2
+        # else:
+        final_sentiment = roberta_sentiment
+        final_confidence = (probs[0, final_sentiment].item() + roberta_probs[0, final_sentiment].item()) /2
     else:
         #print("FLAG 2")
         final_sentiment = final_sentiment
