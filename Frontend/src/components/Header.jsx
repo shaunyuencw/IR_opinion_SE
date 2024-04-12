@@ -82,14 +82,14 @@ const Header = () => {
             <Collapse in={showAdvanced} sx={{ width: '100%' }}>
                 <Typography variant="h6" sx={{ my: 2, color: '#020617' }}>Narrow your search result</Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%' }}>
-                    <TextField
+                    {/* <TextField
                         label="Exact Phrase"
                         variant="outlined"
                         size="medium"
                         fullWidth
                         value={exactPhrase}
                         onChange={(e) => setExactPhrase(e.target.value)}
-                    />
+                    /> */}
                     <TextField
                         label="Include Words"
                         variant="outlined"

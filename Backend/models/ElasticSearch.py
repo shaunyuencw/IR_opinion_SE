@@ -77,8 +77,8 @@ class Elastic:
                 query['bool']['must_not'].append({"match": {"Name": word}})
         
         # Filter by exchange type
-        if exchange_type:
-            query['bool']['filter'].append({"term": {"Exchange": exchange_type}})
+        # if exchange_type:
+        #     query['bool']['filter'].append({"term": {"Exchange": exchange_type}})
 
         # Execute the search query
         search_results = self.es.search(index=self.index_name, body={"size": 10, "query": query})
@@ -86,8 +86,8 @@ class Elastic:
         # Process results
         matching_symbols = []
         for hit in search_results['hits']['hits']:
-            # if exchange_type and hit["_source"]["Exchange"] != exchange_type:
-            #     continue
+            if exchange_type and hit["_source"]["Exchange"] != exchange_type:
+                continue
             item = {"symbol": hit["_source"]["Ticker"], "name": hit["_source"]["Name"]}
             matching_symbols.append(item)
 
