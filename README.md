@@ -33,10 +33,10 @@ After setting up both the frontend and backend, you can run the entire applicati
 The application consists of a web interface that allows users to input a URL and retrieve sentiment analysis results. The interface also displays the sentiment score and sentiment label for the given URL.
 
 - Query Ticker or Company Name
-  ![Query Ticker or Company Name](Misc\Query_Example.jpg)
+  ![Query Ticker or Company Name](https://github.com/shaunyuencw/IR_opinion_SE/blob/main/Misc/Query_Example.jpg)
 
 - Sentiment Analysis Results
-  ![Sentiment Analysis Results](Misc\Webpage_Example.jpg)
+  ![Sentiment Analysis Results](https://github.com/shaunyuencw/IR_opinion_SE/blob/main/Misc/Webpage_Example.jpg)
 
 
 ## Miscellaneous
