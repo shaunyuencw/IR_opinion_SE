@@ -1,10 +1,24 @@
-# React + Vite
+# IR Opinion SE Project - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This project focuses on scraping web content and analyzing it for sentiment and opinions. It utilizes external APIs for data retrieval and analysis.
 
-Currently, two official plugins are available:
+## Getting Started
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+These instructions will guide you through setting up the project on your local machine for development and testing purposes.
 
-Start frontend with `npm run dev` and backend with `uvicorn backend:app --reload`.
+### Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+-   Node.js: A recent version installed on your machine, ideally >=12.x. You can download it from Node.js official website.
+- npm: Comes with Node.js, but make sure it's at least version 7.x.
+
+### Setting Up the Environment
+
+   **Install Required NPM Packages**
+- `npm install` 
+
+
+### Running the Application
+With the environment set up, you're ready to run the Frontend application.
+- `npm run dev`
