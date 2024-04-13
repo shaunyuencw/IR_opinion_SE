@@ -8,6 +8,11 @@ This project focuses on scraping web content and analyzing it for sentiment and 
 
 ### Getting Started
 To get started with this project, you will need to set up both the frontend and backend. Below are the links to the respective setup instructions:
+### Clone Project
+Clone the repository to your local machine. 
+- `git clone https://github.com/shaunyuencw/IR_opinion_SE.git`
+- `cd IR_opinion_SE`
+
 
 ### [Frontend Setup](https://github.com/shaunyuencw/IR_opinion_SE/tree/main/Frontend)
 The frontend setup includes instructions on installing necessary packages and running the frontend application. Check the frontend README for complete setup guidance.
