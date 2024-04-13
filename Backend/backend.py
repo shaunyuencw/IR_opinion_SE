@@ -50,11 +50,11 @@ def load_models():
     roberta_model = torch.load(roberta_model_path, map_location='cpu')
     tokenizer_r = RobertaTokenizer.from_pretrained('roberta-base')
 
-    # # Load SVM models
-    # with open('models/SVMs/neutral_model.sav', 'rb') as f:
-    #     svm_neutral_model = pickle.load(f)
-    # with open('models/SVMs/pos_neg_model.sav', 'rb') as f:
-    #     svm_opinion_model = pickle.load(f)
+    # Load SVM models
+    with open('models/SVMs/neutral_model.sav', 'rb') as f:
+        svm_neutral_model = pickle.load(f)
+    with open('models/SVMs/pos_neg_model.sav', 'rb') as f:
+        svm_opinion_model = pickle.load(f)
 
 # Load models at the start
 load_models()
@@ -157,7 +157,7 @@ async def search(search_term: str, exact_phrase: Optional[str] = None,
 # Asynchronous endpoint to fetch ticker data
 @app.get("/info/", response_model=TickerInfo)
 async def get_ticker_info(ticker: str):
-    # cache the response for TSLA, AAPL, GOOGL
+    # cache the response for TSLA, AAPL, GOOGL, FFBC
     if ticker.upper() == "TSLA":
         print("Fetching cache...")
         return response_info_tsla.data
