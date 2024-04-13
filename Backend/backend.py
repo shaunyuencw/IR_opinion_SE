@@ -10,6 +10,7 @@ import httpx
 import response_info_tsla
 import response_info_aapl
 import response_info_goog
+import response_info_ffbc
 import response_search_news
 from pprint import pprint
 import time
@@ -166,6 +167,9 @@ async def get_ticker_info(ticker: str):
     if ticker.upper() == "GOOG":
         print("Fetching cache...")
         return response_info_goog.data
+    if ticker.upper() == "FFBC":
+        print("Fetching cache...")
+        return response_info_ffbc.data
     
     print("Fetching ticker information...")
     ticker_data = Ticker(ticker=ticker)

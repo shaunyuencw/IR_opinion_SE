@@ -41,12 +41,27 @@ const Header = () => {
 
     const handleSearch = (event, value) => {
         event.preventDefault();
-        if (value && value.symbol) {
-            navigate(`/${value.symbol}`);
+        let symbol = '';
+    
+        if (typeof value === 'string') {
+            // e.g., "AAPL", then we  use it directly
+            symbol = value;
+        } else if (value && value.symbol) {
+            // If value is an object and has a symbol property, extract the part within parentheses
+            const match = value.symbol.match(/\(([^)]+)\)/);
+            if (match) {
+                symbol = match[1];  // This captures the content inside the parentheses
+            } else {
+                symbol = value.symbol; // Use the whole symbol if no parentheses are found
+            }
         } else {
-            navigate(`/${searchQuery}`);
+            // Fallback to using a predefined searchQuery if neither condition is met
+            symbol = searchQuery;
         }
+    
+        navigate(`/${symbol}`);
     };
+    
 
     return (
         <AppBar position="static" elevation={1} sx={{ margin: theme.spacing(0), padding: '20px', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', borderRadius: 8, background: '#93c5fd' }}>
